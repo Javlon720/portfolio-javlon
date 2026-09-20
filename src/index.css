@@ -1,0 +1,285 @@
+@import 'tailwindcss';
+
+/* Dark mode = <html class="dark">, media-query emas (toggle qo'lda boshqariladi) */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ---------------------------------------------------------------
+   DIZAYN TOKENLARI
+   Ranglarni shu yerdan o'zgartirsangiz butun sayt bo'ylab yangilanadi.
+   --------------------------------------------------------------- */
+:root {
+  --bg: #fafafa;
+  --fg: #09090b;
+  --card: #ffffff;
+  --card-fg: #09090b;
+  --muted: #e8ecf0;
+  --muted-fg: #334155;
+  --border: #e4e4e7;
+  --accent: #2563eb;
+  --accent-fg: #ffffff;
+  --accent-soft: #eff4ff;
+  --ring: #2563eb;
+
+  /* Katak (grafik qog'oz) foni */
+  --grid-cell: 64px;
+  --grid-line: color-mix(in srgb, var(--border) 80%, var(--bg));
+
+  /* Fondagi hajmli logolar ostiga tushadigan soya.
+     Qirra rangi esa har bir logoning o'z rangidan olinadi. */
+  --logo-shade: rgb(0 0 0 / 0.26);
+}
+
+.dark {
+  --bg: #09090b;
+  --fg: #fafafa;
+  --card: #131316;
+  --card-fg: #fafafa;
+  --muted: #1e1e22;
+  --muted-fg: #babac4;
+  --border: #27272a;
+  --accent: #60a5fa;
+  --accent-fg: #09090b;
+  --accent-soft: #15203a;
+  --ring: #60a5fa;
+
+  --grid-line: color-mix(in srgb, var(--border) 85%, var(--bg));
+
+  --logo-shade: rgb(0 0 0 / 0.7);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-fg: var(--fg);
+  --color-card: var(--card);
+  --color-card-fg: var(--card-fg);
+  --color-muted: var(--muted);
+  --color-muted-fg: var(--muted-fg);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-accent-soft: var(--accent-soft);
+  --color-ring: var(--ring);
+
+  /* Burchak radiuslari — butun sayt bo'ylab shu ikkitasi ishlatiladi.
+     rounded-card = kartalar/bloklar, rounded-chip = teglar/tugmalar. */
+  --radius-card: 0.875rem;
+  --radius-chip: 0.5rem;
+
+  --font-sans: 'Archivo', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display: 'Space Grotesk', 'Archivo', ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    /* sticky header ostiga yashirinib qolmasligi uchun */
+    scroll-padding-top: 5rem;
+  }
+
+  body {
+    background-color: var(--bg);
+    /* Kataklar — butun ekran bo'ylab, chap va o'ng chetlargacha.
+       Vertikal chiziq aynan markazdan o'tadi, shuning uchun kataklar
+       kontent konteyneri (max-w-5xl = 1024px = 16 katak) chetlariga
+       aniq tushadi. O'lchamini --grid-cell orqali o'zgartirasiz. */
+    background-image:
+      linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+    background-size: var(--grid-cell) var(--grid-cell);
+    background-position: calc(50% + var(--grid-cell) / 2) 0;
+    color: var(--fg);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Klaviatura bilan yurganda fokus doimo ko'rinadi (a11y) */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 3px;
+    border-radius: var(--radius-chip);
+  }
+
+  ::selection {
+    background-color: var(--accent);
+    color: var(--accent-fg);
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.025em;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+}
+
+@layer utilities {
+  /* Scroll bilan ochiladigan elementlar uchun boshlang'ich holat */
+  .reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    transition:
+      opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* ---- Yozuv mashinkasi effekti ----
+     .type-ghost  — to'liq matnning ko'rinmas nusxasi, joyni band qiladi
+     .type-shown  — yozilib borayotgan matn, uning ustiga tushadi
+     .type-caret  — o'chib-yonib turadigan kursor */
+  .type-line {
+    position: relative;
+    display: block;
+  }
+
+  .type-ghost {
+    visibility: hidden;
+  }
+
+  .type-shown {
+    position: absolute;
+    inset: 0;
+  }
+
+  .type-caret {
+    display: inline-block;
+    width: 0.08em;
+    min-width: 2px;
+    height: 1em;
+    margin-left: 0.08em;
+    vertical-align: -0.12em;
+    background-color: currentColor;
+    animation: caret-blink 1s steps(1) infinite;
+  }
+
+  @keyframes caret-blink {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  /* Doira ko'rinishidagi brend logolari: doira rangi currentColor,
+     ichidagi belgi rangi --tc-ink. Ikkalasi ham mavzuga qarab almashadi. */
+  .tech-round {
+    color: var(--tc-light);
+    --tc-ink: var(--tc-ink-l);
+    --tc-edge: var(--tc-edge-l);
+  }
+
+  .dark .tech-round {
+    color: var(--tc-dark);
+    --tc-ink: var(--tc-ink-d);
+    --tc-edge: var(--tc-edge-d);
+  }
+
+  /* Hajm: ketma-ket siljigan soyalar logo ostidan qirra chiqaradi,
+     oxirgisi — yerga tushgan yumshoq soya. Qirra rangi logoning o'ziniki. */
+  .tech-depth {
+    filter:
+      drop-shadow(0 1px 0 var(--tc-edge)) drop-shadow(0 2px 0 var(--tc-edge))
+      drop-shadow(0 3px 0 var(--tc-edge)) drop-shadow(0 4px 0 var(--tc-edge))
+      drop-shadow(0 5px 0 var(--tc-edge)) drop-shadow(0 6px 0 var(--tc-edge))
+      drop-shadow(0 7px 0 var(--tc-edge)) drop-shadow(0 8px 0 var(--tc-edge))
+      drop-shadow(0 16px 18px var(--logo-shade));
+  }
+
+  /* ---- Yon kataklardagi 3D logolar ----
+     .logo-3d        — joylashuv + scrollga bog'liq blur (JS --logo-blur beradi)
+     .logo-3d__persp — perspektiva (3D chuqurlik)
+     .logo-3d__stage — burilish va suzish animatsiyasi
+     (qalinlikni logoning o'zi beradi — .tech-depth) */
+  .logo-3d {
+    position: absolute;
+    /* --shift — scroll paytidagi parallaks siljishi (JS beradi) */
+    translate: -50% calc(-50% + var(--shift, 0px));
+    filter: blur(var(--logo-blur, 0px));
+    will-change: filter, translate;
+  }
+
+  .logo-3d__persp {
+    display: block;
+    perspective: 700px;
+  }
+
+  /* Logoning o'zi hajmli: ketma-ket siljigan soyalar qirra (qalinlik)
+     hosil qiladi, oxirgisi esa yerga tushgan yumshoq soya. */
+  .logo-3d__stage {
+    display: block;
+    transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+    animation: logo-float 11s ease-in-out infinite;
+    animation-delay: var(--delay, 0s);
+  }
+
+  @keyframes logo-float {
+    0%,
+    100% {
+      translate: 0 0;
+    }
+    50% {
+      translate: 0 -8px;
+    }
+  }
+
+  /* Kontent konteyneri chetlaridagi vertikal yo'riqchi chiziqlar —
+     sahifaning tepasidan pastigacha cho'ziladi. */
+  .page-rails {
+    position: fixed;
+    inset: 0;
+    z-index: -10;
+    display: flex;
+    justify-content: center;
+    pointer-events: none;
+  }
+
+  .page-rails::before {
+    content: '';
+    width: 100%;
+    max-width: 64rem; /* max-w-5xl — kontent kengligi bilan bir xil */
+    border-inline: 1px solid var(--border);
+  }
+
+  /* Hero ustidagi kataklarni biroz quyuqlashtiradigan qatlam */
+  .grid-bg {
+    background-image:
+      linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+    background-size: var(--grid-cell) var(--grid-cell);
+    background-position: calc(50% + var(--grid-cell) / 2) 0;
+    mask-image: radial-gradient(ellipse 90% 70% at 50% 0%, #000 30%, transparent 100%);
+  }
+}
+
+/* Harakatni kamaytirish rejimi — barcha animatsiyalar o'chadi */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+}
